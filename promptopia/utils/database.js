@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-let isConnected = false; // track the connection
+let isConnected = false; // Track the connection
 
 export const connectToDB = async () => {
   mongoose.set("strictQuery", true);
 
   if (isConnected) {
-    console.log("Connecting to MongoDB");
+    console.log("Already connected to MongoDB");
     return;
   }
 
@@ -14,12 +14,11 @@ export const connectToDB = async () => {
     await mongoose.connect(process.env.MONGODB_URI, {
       dbName: "share_prompt",
       useNewUrlParser: true,
-      useUnifiedUrlParser: true,
     });
 
     isConnected = true;
     console.log("Connected to MongoDB");
   } catch (err) {
-    console.log("Error connecting to MongoDB", err);
+    console.error("Error connecting to MongoDB", err);
   }
 };

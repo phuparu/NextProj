@@ -3,16 +3,17 @@ import { Schema, model, models } from "mongoose";
 const UserSchema = new Schema({
   email: {
     type: String,
-    unique: [true, "Email alredy exists!"],
-    required: [true, "Required!"],
+    unique: [true, "Email already exists!"],
+    required: [true, "Email is required!"],
   },
   username: {
     type: String,
-    required: [true, "Required!"],
+    required: [true, "Username is required!"],
     match: [
       /^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-      "Username invalid, it should contain 8-20 alphanumeric letters and be unique!",
+      "Username invalid, it should contain 8-20 alphanumeric letters and can include periods and underscores, but cannot start or end with them or have consecutive periods or underscores.",
     ],
+    unique: [true, "Username already exists!"], // Ensure unique constraint
   },
   image: {
     type: String,

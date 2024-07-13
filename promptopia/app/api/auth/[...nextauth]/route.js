@@ -13,7 +13,6 @@ const handler = NextAuth({
   ],
   callbacks: {
     async session({ session }) {
-      // store the user id from MongoDB to session
       const sessionUser = await User.findOne({ email: session.user.email });
       session.user.id = sessionUser._id.toString();
 
@@ -23,14 +22,37 @@ const handler = NextAuth({
       try {
         await connectToDB();
 
-        // check if user already exists
+        // Check if user already exists
         const userExists = await User.findOne({ email: profile.email });
 
-        // if not, create a new document and save user in MongoDB
+        // Function to generate a valid username
+        const generateValidUsername = (name) => {
+          let username = name.replace(/[^a-zA-Z0-9._]/g, ""); // Remove invalid characters
+          if (username.length < 8) {
+            username = username.padEnd(8, "0"); // Pad to meet minimum length
+          } else if (username.length > 20) {
+            username = username.substring(0, 20); // Trim to meet maximum length
+          }
+          return username.toLowerCase();
+        };
+
         if (!userExists) {
+          let username = generateValidUsername(profile.name);
+
+          // Ensure the username is unique
+          let userCheck = await User.findOne({ username });
+          let uniqueUsername = username;
+          let counter = 1;
+          while (userCheck) {
+            uniqueUsername = `${username}${counter}`;
+            userCheck = await User.findOne({ username: uniqueUsername });
+            counter += 1;
+          }
+
+          // Create a new user document
           await User.create({
             email: profile.email,
-            username: profile.name.replace(" ", "").toLowerCase(),
+            username: uniqueUsername,
             image: profile.picture,
           });
         }
