@@ -51,11 +51,24 @@ export const DELETE = async (request, { params }) => {
   try {
     await connectToDB();
 
+    // Validate the ID
+    if (!ObjectId.isValid(params.id)) {
+      return new Response("Invalid ID format", { status: 400 });
+    }
+
     // Find the prompt by ID and remove it
-    await Prompt.findByIdAndRemove(params.id);
+    const deletedPrompt = await Prompt.findByIdAndDelete(params.id);
+
+    if (!deletedPrompt) {
+      return new Response("Prompt not found", { status: 404 });
+    }
 
     return new Response("Prompt deleted successfully", { status: 200 });
   } catch (error) {
-    return new Response("Error deleting prompt", { status: 500 });
+    console.error("Error deleting prompt:", error.message); // Enhanced error logging
+    console.error("Stack trace:", error.stack); // Log stack trace
+    return new Response(`Error deleting prompt: ${error.message}`, {
+      status: 500,
+    });
   }
 };
